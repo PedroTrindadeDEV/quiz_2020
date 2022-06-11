@@ -1,8 +1,7 @@
-const path = require('path');
+const path = require("path");
 
 // Load ORM
-const Sequelize = require('sequelize');
-
+const Sequelize = require("sequelize");
 
 // Environment variable to define the URL of the data base to use.
 // To use SQLite data base:
@@ -12,18 +11,35 @@ const url = process.env.DATABASE_URL || "sqlite:quiz.sqlite";
 const sequelize = new Sequelize(url);
 
 // Import the definition of the Quiz Table from quiz.js
-const Quiz = sequelize.import(path.join(__dirname, 'quiz'));
+const Quiz = sequelize.import(path.join(__dirname, "quiz"));
+
+// Import the definition of the Group Table from group.js
+const Group = sequelize.import(path.join(__dirname, "group"));
 
 // Import the definition of the Users Table from user.js
-const User = sequelize.import(path.join(__dirname,'user'));
+const User = sequelize.import(path.join(__dirname, "user"));
 
 // Session
-sequelize.import(path.join(__dirname,'session'));
-
+sequelize.import(path.join(__dirname, "session"));
 
 // Relation 1-to-N between User and Quiz:
-User.hasMany(Quiz, {as: 'quizzes', foreignKey: 'authorId'});
-Quiz.belongsTo(User, {as: 'author', foreignKey: 'authorId'});
+User.hasMany(Quiz, { as: "quizzes", foreignKey: "authorId" });
+Quiz.belongsTo(User, { as: "author", foreignKey: "authorId" });
 
+//NaN Quizzes y Groups
+
+Quiz.belongsToMany(Group, {
+  as: "groups",
+  through: "GroupQuizzes",
+  foreignKey: "quizId",
+  otherKey: "groupId",
+});
+
+Group.belongsToMany(Quiz, {
+  as: "quizzes",
+  through: "GroupQuizzes",
+  foreignKey: "groupId",
+  otherKey: "quizId",
+});
 
 module.exports = sequelize;
